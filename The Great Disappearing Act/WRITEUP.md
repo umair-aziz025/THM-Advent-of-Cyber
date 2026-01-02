@@ -941,5 +941,86 @@ main();
 
 ---
 
+## 🎭 Bonus: Hopper's Invitation Decryption
+
+### The Hidden Room
+
+After escaping, the invite code led to a mysterious website with a countdown timer and encrypted file.
+
+**Website:** `https://static-labs.tryhackme.cloud/apps/hoppers-invitation/`
+
+**Encrypted File:** `https://assets.tryhackme.com/additional/aoc2025/files/hopper-origins.txt`
+
+### Decryption Process
+
+The website's JavaScript revealed the encryption algorithm:
+- **Algorithm:** AES-256-GCM
+- **Key Derivation:** PBKDF2 with 100,000 iterations (SHA-256)
+- **Password:** `THM{There.is.no.EASTmas.without.Hopper}` (from escape_check.sh)
+
+**Encrypted Data Structure:**
+```
+Bytes 0-15:  Salt (16 bytes)
+Bytes 16-27: IV (12 bytes for GCM mode)
+Bytes 28-43: Additional Authenticated Data (16 bytes)
+Bytes 44+:   Ciphertext
+```
+
+### Python Decryption Script
+
+```python
+#!/usr/bin/env python3
+import base64
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+
+# Download fresh ciphertext after timer expires
+ciphertext_b64 = "hlRAqw3zFxnrgUw1GZusk+whhQHE0F+g7YjWjoJvpZRSCoDzehjXsEX1wQ6TTlOPyEJ/k+AEiMOxdqywh/86AOmhTaXNyZAvbHUVjfMdTqdzxmLXZJwI5ynI"
+password = "THM{There.is.no.EASTmas.without.Hopper}"
+
+# Decode and parse
+encrypted_data = base64.b64decode(ciphertext_b64)
+salt = encrypted_data[0:16]
+iv = encrypted_data[16:28]
+aad = encrypted_data[28:44]
+ciphertext = encrypted_data[44:]
+
+# Derive key using PBKDF2
+kdf = PBKDF2HMAC(
+    algorithm=hashes.SHA256(),
+    length=32,
+    salt=salt,
+    iterations=100000,
+    backend=default_backend()
+)
+key = kdf.derive(password.encode())
+
+# Decrypt with AES-GCM
+combined_data = ciphertext + aad
+aesgcm = AESGCM(key)
+plaintext_bytes = aesgcm.decrypt(iv, combined_data, None)
+plaintext = plaintext_bytes.decode('utf-8')
+
+print(plaintext)
+# Output: https://tryhackme.com/jr/ho-aoc2025-yboMoPbnEX
+```
+
+### The Secret Room
+
+**Decrypted URL:** `https://tryhackme.com/jr/ho-aoc2025-yboMoPbnEX`
+
+This unlocked a hidden TryHackMe room revealing Hopper's backstory and origins! 🎉
+
+### Technical Notes
+
+1. **Timer-Based Content:** The encrypted file changed after the countdown timer expired (December 5, 2025, 18:00 UTC)
+2. **Before Timer:** Ciphertext decrypted to "It isn't time yet. When the time is right, Hopper welcomes you to learn more..."
+3. **After Timer:** Ciphertext contained the actual room URL
+4. **JavaScript Analysis:** Found the exact decryption algorithm by downloading `/apps/hoppers-invitation/assets/index-C4-4uPfO.js`
+
+---
+
 *Writeup by Mr. Umair | TryHackMe Advent of Cyber 2025 Side Quest*
 
