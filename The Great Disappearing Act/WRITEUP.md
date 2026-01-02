@@ -65,26 +65,117 @@
 
 ---
 
+## ⚠️ Common Pitfall - Credential Discovery
+
+**Many people get stuck here!** The credentials `guard.hopkins@hopsecasylum.com:Johnnyboy1982!` are **NOT** found through:
+- ❌ Port 21337 (Side Quest unlock page)
+- ❌ Default credentials or guessing
+- ❌ The Security Console itself
+
+**✅ The credentials are discovered through OSINT on the Fakebook application (Port 8000).**
+
+You must:
+1. Scan all ports on the target machine (`nmap -p- TARGET_IP`)
+2. Find port 8000 running "Fakebook" (a social media clone)
+3. Browse profiles to find `guard.hopkins@hopsecasylum.com`
+4. Gather OSINT: Name (John Hopkins), nickname (Johnnyboy), birth year (1982)
+5. Build a wordlist and brute force the login
+6. Discover password: `Johnnyboy1982!`
+
+See **Part 1, Step 2** below for the complete OSINT walkthrough.
+
+---
+
 ## 🔓 Part 1: Unlocking Hopper's Cell (Flag 1)
 
-### Discovery & Authentication
+### Step 1: Port Scanning & Service Discovery
 
-The initial target was a web interface at `http://TARGET_IP:8080` controlling the HopSec Asylum Security Console. 
+First, we need to discover all services running on the target machine. Using `nmap`:
 
-**Login Endpoint:** `/cgi-bin/login.sh`
+```bash
+nmap -sV -p- TARGET_IP
+```
 
-**Credentials Found:**
+**Key Services Found:**
+- **Port 21337:** Side Quest unlock page (enter `now_you_see_me` to unlock challenge)
+- **Port 8000:** Fakebook (social media clone) ⚠️ **Critical for credential discovery**
+- **Port 8080:** HopSec Asylum Security Console
+- **Port 13400:** Video Portal (frontend)
+- **Port 13401:** Video Portal API (backend)
+
+> **⚠️ Important:** Port 8000 (Fakebook) is essential for finding the credentials. The Side Quest unlock at port 21337 only activates the challenge—it does NOT provide credentials!
+
+### Step 2: OSINT via Fakebook (Port 8000)
+
+Navigate to `http://TARGET_IP:8000` to access the Fakebook application—a social media platform for HopSec staff.
+
+#### Finding Guard Hopkins' Profile
+
+1. **Browse user profiles** or search for "Hopkins"
+2. **Locate the profile:** `guard.hopkins@hopsecasylum.com`
+3. **Gather OSINT data** from the profile:
+   - Full Name: **John Hopkins**
+   - Position: **Security Guard at HopSec Asylum**
+   - Birth Year: **1982**
+   - Posts mention: **"Johnnyboy"** (nickname)
+
+#### Credential Bruteforcing
+
+Based on the OSINT, create a targeted wordlist:
+
+**Password Pattern Analysis:**
+- Nickname: `Johnnyboy`
+- Birth Year: `1982`
+- Common patterns: `Name + Year + Special`
+
+**Create Wordlist:**
+```bash
+# Password candidates
+Johnnyboy1982
+Johnnyboy1982!
+Johnnyboy82
+johnny1982
+Hopkins1982
+...
+```
+
+**Brute Force Login (example using Python):**
+```python
+import requests
+
+url = "http://TARGET_IP:8080/cgi-bin/login.sh"
+email = "guard.hopkins@hopsecasylum.com"
+passwords = ["Johnnyboy1982", "Johnnyboy1982!", "Johnnyboy82", ...]
+
+for password in passwords:
+    response = requests.post(url, data={"username": email, "password": password})
+    if "Login Successful" in response.text or response.status_code == 200:
+        print(f"[+] Found valid credentials: {email}:{password}")
+        break
+```
+
+**✅ Valid Credentials Discovered:**
 - **Username:** `guard.hopkins@hopsecasylum.com`
 - **Password:** `Johnnyboy1982!`
 
-### Web Interface Analysis
+### Step 3: Accessing the Security Console
+
+Navigate to `http://TARGET_IP:8080` — the **HopSec Asylum Security Console**.
+
+**Login Endpoint:** `/cgi-bin/login.sh`
+
+Use the credentials found through Fakebook OSINT:
+- **Username:** `guard.hopkins@hopsecasylum.com`
+- **Password:** `Johnnyboy1982!`
+
+### Step 4: Web Interface Analysis
 
 After logging in, the security console revealed an interactive map with:
 - 🔑 Key icons for door access
 - 📹 Camera feeds
 - 🚪 Exit door (hidden until all keys obtained)
 
-### Exploitation - Cell Door Unlock
+### Step 5: Exploitation - Cell Door Unlock
 
 The cell door was controlled via the `/cgi-bin/key_flag.sh` endpoint. As an authenticated user, we could remotely unlock Hopper's cell:
 
