@@ -3,7 +3,7 @@
 
 Welcome to the Advent of Cyber 2025 Writeups!
 
-This repository is dedicated to documenting solutions, lessons, and experiences from the TryHackMe Advent of Cyber event and other CTF challenges. Each challenge will have its own folder and writeup, making it easy to track progress and share knowledge.
+This repository is dedicated to documenting solutions, lessons, and experiences from the TryHackMe Advent of Cyber event. Each challenge will have its own folder and writeup, making it easy to track progress and share knowledge.
 
 ## ⚠️ Current Status
 
