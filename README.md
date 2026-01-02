@@ -37,44 +37,17 @@ Get ready for the Advent of Cyber 2025! This year’s event features daily begin
 
 For full terms and conditions, see the official TryHackMe event page.
 
-## Repository Purpose & Structure
+## Repository Structure
 
-This repository holds writeups for each challenge. Structure your contributions as follows:
-
-### Recommended Folder Structure
-
-- `THM-Writeups/`
-  - `1. Challenge Name/`
-    - `WRITEUP.md`
-    - `notes.txt`
-    - `exploit.py`
-    - `screenshots/`
-
-### How to Add a New Challenge
-1. Create a new directory with a numbered prefix and short name, e.g. `02. Web - SQLi`.
-2. Add a `WRITEUP.md` covering: objective, steps taken, commands used, screenshots, final flag(s), and lessons learned.
-3. Keep sensitive data out of the repo (passwords, private keys). If needed, redact or store securely.
-
-## Commit & Push (Suggested)
-
-Use the following commands in PowerShell from the `THM-Writeups` directory:
-
-```powershell
-# ensure branch name (rename if needed)
-git branch -M main
-# stage README and new challenge folders
-git add README.md "1. Linux CLI - Shells Bells"
-# commit
-git commit -m "Add main README and initial Day 1 writeup"
-# add remote if not added
-git remote add origin https://github.com/umair-aziz025/THM-Advent-of-Cyber
-# push
-git push -u origin main
+```
+THM-Writeups/
+├── Linux CLI - Shells Bells/        # Day 1 Challenge
+│   ├── WRITEUP.md
+│   └── final_flag.png
+└── The Great Disappearing Act/      # Side Quest 1
+    └── WRITEUP.md
 ```
 
-## Notes
-- Add a `.gitignore` to exclude virtual environments, OS files, and editor backups (e.g., `venv/`, `*.pyc`, `.vscode/`).
-- If multiple people contribute, follow a branch-per-feature workflow and open PRs.
-
 ## Contact
-Maintainer: `Mr. Umair` — open an issue or PR for changes to this template.
+
+Maintainer: **Mr. Umair** — Feel free to open an issue for any questions or suggestions!
